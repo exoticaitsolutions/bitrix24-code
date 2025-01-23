@@ -1,3 +1,4 @@
+import os
 import smtplib
 import pandas as pd
 from email.mime.text import MIMEText
@@ -9,12 +10,12 @@ from logging_setup import setup_logging
 logger = setup_logging()
 
 
-# Email credentials
-EMAIL = 'pythonweb@exoticaitsolutions.com'
-PASSWORD = 'Webpython@123#'
-RECEIVER_EMAILS = ['webbdeveloper24@gmail.com']
-SMTP_PORT = 465
-SMTP_HOST = "smtp.hostinger.com"
+# Email credentials from environment variables
+EMAIL = os.getenv('EMAIL')
+PASSWORD = os.getenv('PASSWORD')
+RECEIVER_EMAILS = os.getenv('RECEIVER_EMAILS')  # Comma-separated 
+SMTP_PORT = os.getenv('SMTP_PORT')
+SMTP_HOST = os.getenv('SMTP_HOST')
 
 # CSV files to read
 csv_files = ['My Chart - Bids per Bidder.csv', 'My Chart - Job Category wise for Deals each stage.csv']
