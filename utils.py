@@ -86,13 +86,8 @@ def scrapping():
 
     bi_builder = driver.find_element(By.XPATH, '//*[@id="bx_left_menu_menu_bi_constructor"]/a/span[2]')
     bi_builder.click()
-    time.sleep(30)
-
-    # click_deal_analyse = driver.find_element(By.XPATH, '//*[@id="biconnector_superset_dashboard_grid_table"]/tbody/tr[2]/td[2]/div/span/div/div/a')
-    # click_deal_analyse.click()
-    # time.sleep(50)
-
-    search_inputs = ["Deal analytics BI Report :)"]
+    time.sleep(20)
+    
     if SEARCHES_INPUTS:
         logger.info(f"Starting search for: {SEARCHES_INPUTS}")
         search = driver.find_element(By.CLASS_NAME, 'main-ui-filter-search-filter')
