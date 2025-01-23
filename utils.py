@@ -87,7 +87,7 @@ def scrapping():
     bi_builder = driver.find_element(By.XPATH, '//*[@id="bx_left_menu_menu_bi_constructor"]/a/span[2]')
     bi_builder.click()
     time.sleep(20)
-    
+
     if SEARCHES_INPUTS:
         logger.info(f"Starting search for: {SEARCHES_INPUTS}")
         search = driver.find_element(By.CLASS_NAME, 'main-ui-filter-search-filter')
@@ -168,7 +168,6 @@ def scrapping():
                 files = os.listdir(downloads_folder)
                 latest_file = max([f for f in files if f.endswith('.csv')], key=lambda f: os.path.getmtime(os.path.join(downloads_folder, f)))
                 latest_file_path = os.path.join(downloads_folder, latest_file)
-                current_directory = os.getcwd()
                 csv_name = f"{name}.csv"
                 # destination = os.path.join(current_directory, csv_name)
                 destination = os.path.join(csv_folder_path, csv_name)
