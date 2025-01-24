@@ -227,7 +227,7 @@ def scrapping():
                     EC.element_to_be_clickable((By.XPATH, "//li[contains(@class, 'ant-dropdown-menu-item') and span[text()='Export to .CSV']]"))
                 )
                 export_to_csv.click()
-                time.sleep(60)
+                time.sleep(20)
                 files = os.listdir(downloads_folder)
                 latest_file = max([f for f in files if f.endswith('.csv')], key=lambda f: os.path.getmtime(os.path.join(downloads_folder, f)))
                 latest_file_path = os.path.join(downloads_folder, latest_file)
