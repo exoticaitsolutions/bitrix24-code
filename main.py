@@ -1,5 +1,12 @@
+import os
 from send_email_setup import create_email, send_email
 from utils import scrapping
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+SUBJECT = os.getenv('SUBJECT')
 
 def main():
     """
@@ -11,7 +18,7 @@ def main():
     # Create the email
     subject = "CSV Files Attachment of Bitrix24"
     body = "Please find the attached Bitrix24 CSV files."
-    message = create_email(subject, body, csv_files)
+    message = create_email(SUBJECT, body, csv_files)
     
     # Send the email
     send_email(message)

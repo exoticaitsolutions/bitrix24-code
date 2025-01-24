@@ -1,16 +1,17 @@
 import os
 import shutil
 import time
+
+import pandas as pd
 from logging_setup import setup_logging
 from webdriver_configration import driver_confrigration
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import os
 from dotenv import load_dotenv
-from selenium.webdriver.chrome.options import Options
 from urls import *
 
 # Load environment variables from the .env file
@@ -44,34 +45,47 @@ if not os.path.exists(csv_folder_path):
 csv_names = []
 
 def login():
-    driver = driver_confrigration()
-    driver.get(login_url)
-    time.sleep(15)
+    try:
+        driver = driver_confrigration()  # Assuming driver_confrigration() is defined elsewhere
+        driver.get(login_url)
+        time.sleep(15)
 
-    input_email_field = driver.find_element(By.ID, "login")
-    input_email_field.send_keys(EMAIL)
-    time.sleep(5)
-    next_button = driver.find_element(By.XPATH, "//button[@data-action='submit']")
-    next_button.click()
-    time.sleep(5)
-    input_password_field = driver.find_element(By.ID, "password")
-    input_password_field.send_keys(PASSWORD)
-    next_button = driver.find_element(By.XPATH, "//button[@data-action='submit']")
-    next_button.click()
-    time.sleep(10)
-    login_button = driver.find_element(By.CSS_SELECTOR, ".portal-auth-bitrix24__button.portal-auth-bitrix24__button_type_2")
-    login_button.click()
-    time.sleep(10)
-    enter_button = driver.find_element(By.CSS_SELECTOR, ".bx-ui-button.bx-ui-button_primary")
-    enter_button.click()
-    time.sleep(10)
-    my_account_button = driver.find_element(By.XPATH, "//div[contains(@class, 'portal-auth-bitrix24__button portal-auth-bitrix24__button_type_2')]")
-
-    # Click the button
-    my_account_button.click()
-    time.sleep(10)
-    logger.info("sucesfully click on my account buton")
-    return driver
+        input_email_field = driver.find_element(By.ID, "login")
+        input_email_field.send_keys(EMAIL)
+        time.sleep(5)
+        
+        next_button = driver.find_element(By.XPATH, "//button[@data-action='submit']")
+        next_button.click()
+        time.sleep(5)
+        
+        input_password_field = driver.find_element(By.ID, "password")
+        input_password_field.send_keys(PASSWORD)
+        
+        next_button = driver.find_element(By.XPATH, "//button[@data-action='submit']")
+        next_button.click()
+        time.sleep(10)
+        
+        login_button = driver.find_element(By.CSS_SELECTOR, ".portal-auth-bitrix24__button.portal-auth-bitrix24__button_type_2")
+        login_button.click()
+        time.sleep(10)
+        
+        enter_button = driver.find_element(By.CSS_SELECTOR, ".bx-ui-button.bx-ui-button_primary")
+        enter_button.click()
+        time.sleep(10)
+        
+        my_account_button = driver.find_element(By.XPATH, "//div[contains(@class, 'portal-auth-bitrix24__button portal-auth-bitrix24__button_type_2')]")
+        my_account_button.click()
+        time.sleep(10)
+        
+        logger.info("Successfully clicked on my account button")
+        return driver
+        
+    except NoSuchElementException as e:
+        logger.error(f"Element not found: {e}")
+    except TimeoutException as e:
+        logger.error(f"Timeout occurred: {e}")
+    except Exception as e:
+        logger.error(f"An unexpected error occurred: {e}")
 
 def scrapping():
     driver = login()
@@ -100,20 +114,69 @@ def scrapping():
             EC.element_to_be_clickable((By.CSS_SELECTOR, '.dashboard-title-wrapper__item.dashboard-title-preview a'))
         )
         first_result.click()
-        time.sleep(15) 
+        time.sleep(30) 
 
     try:
         # Wait for the iframe to load
-        iframe = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "iframe.side-panel-iframe"))
+        iframe1 = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "iframe.side-panel-iframe"))
         )
-        driver.switch_to.frame(iframe)
+        driver.switch_to.frame(iframe1)
+        iframe2 = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "iframe[sandbox]"))  # Adjust the selector as needed
+        )
+        driver.switch_to.frame(iframe2)
+        table_container = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, '//*[@id="GRID_ID-panel-GRID_ID"]/div/div/div[4]/div/div/div/div/div/div'))
+        )
+        # table_container = driver.find_element(By.CLASS_NAME, 'chart-container css-1qhlnix')
+        rows = table_container.find_elements(By.TAG_NAME, 'tr')
+        headers = [header.text for header in rows[0].find_elements(By.TAG_NAME, 'th')]
+        table_data = []
+        for row in rows[1:]:  # Skip the header row
+            cells = row.find_elements(By.TAG_NAME, 'td')
+            row_data = [cell.text for cell in cells]
+            table_data.append(row_data)
+        df = pd.DataFrame(table_data, columns=headers)
+        # csv_file = "scraped_table.csv"
+        csv_file = os.path.join(CSV_FOLDER, "scraped_table.csv")
+
+        df.to_csv(csv_file, index=False)
+        all_deals_table_content = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, '//*[@id="GRID_ID-panel-GRID_ID"]/div/div/div[5]/div/div/div/div/div/div/div[2]'))
+        )
+        rows = all_deals_table_content.find_elements(By.TAG_NAME, 'tr')
+        headers = [header.text for header in rows[0].find_elements(By.TAG_NAME, 'th')]
+        # Extract table rows
+        table_data = []
+        for row in rows[1:]:  # Skip the header row
+            cells = row.find_elements(By.TAG_NAME, 'td')
+            row_data = [cell.text for cell in cells]
+            table_data.append(row_data)
+        # Convert the data into a Pandas DataFrame
+        df = pd.DataFrame(table_data, columns=headers)
+        # Save the table data to a CSV file
+        # csv_file = "scraped_all_deals_table.csv"
+        csv_file = os.path.join(CSV_FOLDER, "scraped_all_deals_table.csv")
+
+        df.to_csv(csv_file, index=False)
+        csv_names.append(csv_file)
+        time.sleep(6)
+        driver.get(driver.current_url)
+        time.sleep(15)
+
+        iframe1 = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "iframe.side-panel-iframe"))
+        )
+        driver.switch_to.frame(iframe1)
         
         # Locate and click the Edit button
         edit_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.ID, "edit-btn"))
         )
+
         edit_button.click()
+
         time.sleep(20)
         driver.switch_to.default_content()
         # Close the current tab
