@@ -142,6 +142,7 @@ def scrapping():
         csv_file = os.path.join(CSV_FOLDER, "scraped_table.csv")
 
         df.to_csv(csv_file, index=False)
+        csv_names.append(csv_file)
         all_deals_table_content = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, '//*[@id="GRID_ID-panel-GRID_ID"]/div/div/div[5]/div/div/div/div/div/div/div[2]'))
         )
@@ -155,8 +156,6 @@ def scrapping():
             table_data.append(row_data)
         # Convert the data into a Pandas DataFrame
         df = pd.DataFrame(table_data, columns=headers)
-        # Save the table data to a CSV file
-        # csv_file = "scraped_all_deals_table.csv"
         csv_file = os.path.join(CSV_FOLDER, "scraped_all_deals_table.csv")
 
         df.to_csv(csv_file, index=False)
