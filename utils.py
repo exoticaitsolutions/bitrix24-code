@@ -139,7 +139,7 @@ def scrapping():
             table_data.append(row_data)
         df = pd.DataFrame(table_data, columns=headers)
         # csv_file = "scraped_table.csv"
-        csv_file = os.path.join(CSV_FOLDER, "scraped_table.csv")
+        csv_file = os.path.join(CSV_FOLDER, "Job Category wise for Deals each stage Table.csv")
 
         df.to_csv(csv_file, index=False)
         csv_names.append(csv_file)
@@ -156,7 +156,7 @@ def scrapping():
             table_data.append(row_data)
         # Convert the data into a Pandas DataFrame
         df = pd.DataFrame(table_data, columns=headers)
-        csv_file = os.path.join(CSV_FOLDER, "scraped_all_deals_table.csv")
+        csv_file = os.path.join(CSV_FOLDER, "All Deals Table.csv")
 
         df.to_csv(csv_file, index=False)
         csv_names.append(csv_file)
